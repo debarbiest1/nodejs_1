@@ -46,7 +46,7 @@
         }
         .form-container {
             margin: 20px auto;
-            width: 300px;
+            width: 600px ;
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -57,6 +57,47 @@
             padding: 8px;
             width: calc(100% - 16px);
         }
+        #allPatientsContainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        table caption {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        table td, table th {
+            text-align: left;
+        }
+
     </style>
 </head>
 <body>
@@ -186,10 +227,17 @@
 
     function updatePatientDetails(patient) {
         const details = document.getElementsByClassName("patientDetails");
-        const patientInfo = `ID: ${patient.ID}, Name: ${patient.name}, Age: ${patient.age}, Gender: ${patient.gender}, Contact: ${patient.contact}, Address: ${patient.address}`;
+        const patientInfo = `
+        <strong>ID:</strong> ${patient.id}<br>
+        <strong>Name:</strong> ${patient.name}<br>
+        <strong>Age:</strong> ${patient.age}<br>
+        <strong>Gender:</strong> ${patient.gender}<br>
+        <strong>Contact:</strong> ${patient.contact}<br>
+        <strong>Address:</strong> ${patient.address}
+    `;
 
         for (let i = 0; i < details.length; i++) {
-            details[i].textContent = patientInfo;
+            details[i].innerHTML = patientInfo; // Use innerHTML for HTML formatting
         }
     }
 
@@ -255,47 +303,77 @@
     });
 
     // Update Patient
-    document.getElementById("updatePatientForm").addEventListener("submit", function (e) {
-        e.preventDefault();
+document.getElementById("updatePatientForm").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-        const updateId = document.getElementById("updateId").value;
-        const patientData = {
-            name: document.getElementById("updateName").value,
-            age: document.getElementById("updateAge").value
-                ? parseInt(document.getElementById("updateAge").value, 10)
-                : undefined,
-            gender: document.getElementById("updateGender").value || undefined,
-            contact: document.getElementById("updateContact").value || undefined,
-            address: document.getElementById("updateAddress").value || undefined,
-        };
+    const updateId = document.getElementById("updateId").value;
+    const patientData = {};
 
-        let validationError;
-        if (patientData.age <= 0 ) {
-            validationError =  "Age must be a positive number";
+    // Dynamically add fields only if they are provided
+    const name = document.getElementById("updateName").value;
+    if (name) {
+        if (name.length < 2 || name.length > 25) {
+            showMessage("Name must be between 2 and 25 characters", false);
+            return;
         }
+        patientData.name = name;
+    }
 
-        if (validationError) {
-            showMessage(validationError, false);
-            return; 
+    const age = document.getElementById("updateAge").value;
+    if (age) {
+        const ageInt = parseInt(age, 10);
+        if (ageInt <= 0) {
+            showMessage("Age must be a positive number", false);
+            return;
         }
+        patientData.age = ageInt;
+    }
 
+    const gender = document.getElementById("updateGender").value;
+    if (gender) {
+        if (gender !== "M" && gender !== "F") {
+            showMessage("Gender must be either 'M' or 'F'", false);
+            return;
+        }
+        patientData.gender = gender;
+    }
 
-        fetch(`${baseUrl}/${updateId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(patientData),
+    const contact = document.getElementById("updateContact").value;
+    if (contact) {
+        if (!contact.startsWith("+7") || contact.length < 12) {
+            showMessage("Contact must start with '+7' and be at least 12 characters long", false);
+            return;
+        }
+        patientData.contact = contact;
+    }
+
+    const address = document.getElementById("updateAddress").value;
+    if (address) {
+        patientData.address = address;
+    }
+
+    // Ensure there is at least one field to update
+    if (Object.keys(patientData).length === 0) {
+        showMessage("Please provide at least one field to update", false);
+        return;
+    }
+
+    fetch(`${baseUrl}/${updateId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patientData),
+    })
+        .then(handleResponse)
+        .then((data) => {
+            if (data.code === 200) {
+                showMessage("Patient updated successfully!");
+                updatePatientDetails(data.content);
+            }
         })
-            .then(handleResponse)
-            .then((data) => {
-                if (data.code === 200) {
-                    showMessage("Patient updated successfully!");
-                    updatePatientDetails(data.content);
-                }
-            })
-            .catch((error) => {
-                showMessage(error.message || "Error updating patient", false);
-            });
-    });
+        .catch((error) => {
+            showMessage(error.message || "Error updating patient", false);
+        });
+});
 
     // Delete Patient
     document.getElementById("deletePatientForm").addEventListener("submit", function (e) {
@@ -340,27 +418,36 @@
             });
     });
     function showAllPatients() {
-            const allPatientsContainer = document.getElementById("allPatientsContainer");
-            const allPatientsList = document.getElementById("allPatientsList");
+        const allPatientsContainer = document.getElementById("allPatientsContainer");
+        const allPatientsList = document.getElementById("allPatientsList");
 
-            allPatientsList.innerHTML = "";
+        // Hide all other forms
+        const forms = document.querySelectorAll('.form-container');
+        forms.forEach(form => form.classList.add('hidden'));
 
-            fetch(baseUrl)
-                .then(handleResponse)
-                .then((data) => {
-                    if (data.code === 200) {
-                        data.content.forEach((patient) => {
-                            const listItem = document.createElement("li");
-                            listItem.textContent = `ID: ${patient.id}, Name: ${patient.name}, Age: ${patient.age}, Gender: ${patient.gender}, Contact: ${patient.contact}, Address: ${patient.address}`;
-                            allPatientsList.appendChild(listItem);
-                        });
-                        allPatientsContainer.classList.remove("hidden");
-                    }
-                })
-                .catch((error) => {
-                    showMessage(error.message || "Error fetching all patients", false);
-                });
-        }
+        // Clear the patient list container
+        allPatientsList.innerHTML = "";
+
+        // Fetch all patients and display them
+        fetch(baseUrl)
+            .then(handleResponse)
+            .then((data) => {
+                if (data.code === 200) {
+                    data.content.forEach((patient) => {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `ID: ${patient.id}, Name: ${patient.name}, Age: ${patient.age}, Gender: ${patient.gender}, Contact: ${patient.contact}, Address: ${patient.address}`;
+                        allPatientsList.appendChild(listItem);
+                    });
+
+                    // Show the container with all patients
+                    allPatientsContainer.classList.remove('hidden');
+                }
+            })
+            .catch((error) => {
+                showMessage(error.message || "Error fetching all patients", false);
+            });
+}
+
 
     
 });
@@ -380,28 +467,67 @@
     }
 
     function showAllPatients() {
+    const allPatientsContainer = document.getElementById("allPatientsContainer");
+    const allPatientsList = document.getElementById("allPatientsList");
 
-        
-        const allPatientsContainer = document.getElementById("allPatientsContainer");
-        const allPatientsList = document.getElementById("allPatientsList");
+    // Hide all other forms
+    const forms = document.querySelectorAll('.form-container');
+    forms.forEach(form => form.classList.add('hidden'));
 
-        allPatientsList.innerHTML = "";
+    // Clear the patient list container
+    allPatientsList.innerHTML = "";
 
-        baseUrl = "http://localhost:8080/patients";
-        fetch(baseUrl)
-            .then(handleResponse)
-            .then((data) => {
-                if (data.code === 200) {
-                    data.content.forEach((patient) => {
-                        const listItem = document.createElement("li");
-                        listItem.textContent = `ID: ${patient.id}, Name: ${patient.name}, Age: ${patient.age}, Gender: ${patient.gender}, Contact: ${patient.contact}, Address: ${patient.address}`;
-                        allPatientsList.appendChild(listItem);
-                    });
-                    allPatientsContainer.classList.remove("hidden");
-                }
-            })
-            .catch((error) => {
-                showMessage(error.message || "Error fetching all patients", false);
-            });
-    }
+    // Fetch all patients and display them as a table
+    fetch("http://localhost:8080/patients")
+        .then(handleResponse)
+        .then((data) => {
+            if (data.code === 200) {
+                // Create the table structure
+                let table = `
+                    <table border="1" cellspacing="0" cellpadding="8">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Contact</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                // Loop through the patients and create a row for each
+                data.content.forEach((patient) => {
+                    table += `
+                        <tr>
+                            <td>${patient.id}</td>
+                            <td>${patient.name}</td>
+                            <td>${patient.age}</td>
+                            <td>${patient.gender}</td>
+                            <td>${patient.contact}</td>
+                            <td>${patient.address}</td>
+                        </tr>
+                    `;
+                });
+
+                table += `
+                        </tbody>
+                    </table>
+                `;
+
+                // Append the table to the container
+                allPatientsList.innerHTML = table;
+
+                // Show the container with the table
+                allPatientsContainer.classList.remove('hidden');
+            }
+        })
+        .catch((error) => {
+            showMessage(error.message || "Error fetching all patients", false);
+        });
+}
+
+
     </script>

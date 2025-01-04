@@ -1,0 +1,74 @@
+[
+  {
+    "id": 2,
+    "name": "KK",
+    "age": 20,
+    "gender": "M",
+    "contact": "+777777777775",
+    "address": "Millenium Street"
+  },
+  {
+    "id": 3,
+    "name": "K",
+    "age": 12,
+    "gender": "M",
+    "contact": "2",
+    "address": "M"
+  },
+  {
+    "id": 4,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 5,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 6,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 7,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 8,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 10,
+    "name": "K",
+    "age": 19,
+    "gender": "M",
+    "contact": "a",
+    "address": "M"
+  },
+  {
+    "id": 11,
+    "name": "Arman Kyzykbaev",
+    "age": 19,
+    "gender": "M",
+    "contact": "+777777777777",
+    "address": "фвф"
+  }
+]

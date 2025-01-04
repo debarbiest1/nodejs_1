@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        section {
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        button {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Clinic Management System</h1>
+    </header>
+
+    <section>
+        <h2>Welcome to the Clinic Management System</h2>
+        <p>Select an option to proceed:</p>
+        <button onclick="location.href='managepatients'">Manage Patients</button>
+        <button onclick="location.href='appointments.html'">Manage Appointments</button>
+        <button onclick="location.href='doctors.html'">Manage Doctors</button>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Clinic Management System</p>
+    </footer>
+</body>
+</html>
