@@ -172,11 +172,9 @@
 
     <script>
         function showForm(formId) {
-            // Hide all forms
             const forms = document.querySelectorAll('.form-container');
             forms.forEach(form => form.classList.add('hidden'));
 
-            // Show the selected form
             document.getElementById(formId).classList.remove('hidden');
         }
     </script>
@@ -237,7 +235,7 @@
     `;
 
         for (let i = 0; i < details.length; i++) {
-            details[i].innerHTML = patientInfo; // Use innerHTML for HTML formatting
+            details[i].innerHTML = patientInfo;
         }
     }
 
@@ -309,7 +307,6 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
     const updateId = document.getElementById("updateId").value;
     const patientData = {};
 
-    // Dynamically add fields only if they are provided
     const name = document.getElementById("updateName").value;
     if (name) {
         if (name.length < 2 || name.length > 25) {
@@ -352,7 +349,6 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
         patientData.address = address;
     }
 
-    // Ensure there is at least one field to update
     if (Object.keys(patientData).length === 0) {
         showMessage("Please provide at least one field to update", false);
         return;
@@ -375,7 +371,6 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
         });
 });
 
-    // Delete Patient
     document.getElementById("deletePatientForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
@@ -398,7 +393,6 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
             });
     });
 
-    // Show Patient
     document.getElementById("showPatientForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
@@ -421,14 +415,11 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
         const allPatientsContainer = document.getElementById("allPatientsContainer");
         const allPatientsList = document.getElementById("allPatientsList");
 
-        // Hide all other forms
         const forms = document.querySelectorAll('.form-container');
         forms.forEach(form => form.classList.add('hidden'));
 
-        // Clear the patient list container
         allPatientsList.innerHTML = "";
 
-        // Fetch all patients and display them
         fetch(baseUrl)
             .then(handleResponse)
             .then((data) => {
@@ -439,7 +430,6 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
                         allPatientsList.appendChild(listItem);
                     });
 
-                    // Show the container with all patients
                     allPatientsContainer.classList.remove('hidden');
                 }
             })
@@ -470,19 +460,15 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
     const allPatientsContainer = document.getElementById("allPatientsContainer");
     const allPatientsList = document.getElementById("allPatientsList");
 
-    // Hide all other forms
     const forms = document.querySelectorAll('.form-container');
     forms.forEach(form => form.classList.add('hidden'));
 
-    // Clear the patient list container
     allPatientsList.innerHTML = "";
 
-    // Fetch all patients and display them as a table
     fetch("http://localhost:8080/patients")
         .then(handleResponse)
         .then((data) => {
             if (data.code === 200) {
-                // Create the table structure
                 let table = `
                     <table border="1" cellspacing="0" cellpadding="8">
                         <thead>
@@ -498,7 +484,6 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
                         <tbody>
                 `;
 
-                // Loop through the patients and create a row for each
                 data.content.forEach((patient) => {
                     table += `
                         <tr>
@@ -517,10 +502,8 @@ document.getElementById("updatePatientForm").addEventListener("submit", function
                     </table>
                 `;
 
-                // Append the table to the container
                 allPatientsList.innerHTML = table;
 
-                // Show the container with the table
                 allPatientsContainer.classList.remove('hidden');
             }
         })

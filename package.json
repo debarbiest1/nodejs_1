@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "code",
   "main": "index.js",
-  "type": "commonjs", 
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +12,7 @@
   "dependencies": {
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "firebase-admin": "^13.0.2"
   }
 }
