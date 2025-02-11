@@ -180,35 +180,63 @@
     </script>
 </body>
 </html>
+ <!-- Firebase SDK -->
+ <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth-compat.js"></script>
 
  <script>
 
 
-    document.addEventListener("DOMContentLoaded", function () {
+// Firebase SDK Initialization
+const firebaseConfig = {
+            apiKey: "AIzaSyBnCkoejLpSZ9n2CAkeJXZBy6gsgtTcHL4",
+            authDomain: "clinicms-40dcc.firebaseapp.com",
+            projectId: "clinicms-40dcc",
+            storageBucket: "clinicms-40dcc.appspot.com",
+            messagingSenderId: "68685621662",
+            appId: "1:68685621662:web:e461f62b3e954a95558e8f",
+            measurementId: "G-2Y2VHQ4H6R"
+        };  
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+document.addEventListener("DOMContentLoaded", async function () {
     const baseUrl = "http://localhost:8080/patients";
 
-    function validatePatientData(patient) {
+    // ✅ Check Authentication on Page Load
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) {
+            alert("You must log in first!");
+            window.location.href = "/";
+            return;
+        }
 
-    if (patient.age <= 0 ) {
-        return "Age must be a positive number";
+        try {
+            const token = await user.getIdToken();
+            localStorage.setItem("firebaseToken", token);
+            console.log("User authenticated:", user.email);
+        } catch (error) {
+            console.error("Error fetching Firebase Token:", error);
+            alert("Session expired. Please log in again.");
+            window.location.href = "/";
+        }
+    });
+
+    // ✅ Fetch Firebase Token for API Requests
+    async function getAuthToken() {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            return await user.getIdToken();
+        }
+        return null;
     }
 
-    if (patient.gender !== "M" && patient.gender !== "F") {
-        return "Gender must be either 'M' or 'F'";
+    // ✅ Function to Show Messages
+    function showMessage(message, success = true) {
+        alert(success ? `✅ ${message}` : `❌ ${message}`);
     }
 
-    if (!patient.name || patient.name.length < 2 || patient.name.length > 25) {
-        return "Name must be between 2 and 25 characters";
-    }
-
-    if (!patient.contact || !patient.contact.startsWith("+7") || patient.contact.length < 12) {
-        return "Contact must start with '+7' and be at least 12 characters long";
-    }
-
-    return null; 
-}
-
-
+    // ✅ Function to Handle API Responses
     function handleResponse(response) {
         return response.json().then((data) => {
             if (response.ok) {
@@ -219,36 +247,34 @@
         });
     }
 
-    function showMessage(message, success = true) {
-        alert(success ? `✅ ${message}` : `❌ ${message}`);
+    // ✅ Validate Patient Data
+    function validatePatientData(patient) {
+        if (patient.age <= 0) return "Age must be a positive number";
+        if (patient.gender !== "M" && patient.gender !== "F") return "Gender must be 'M' or 'F'";
+        if (!patient.name || patient.name.length < 2 || patient.name.length > 25) return "Name must be 2-25 characters";
+        if (!patient.contact || !patient.contact.startsWith("+7") || patient.contact.length < 12) return "Contact must start with '+7' and be at least 12 characters long";
+        return null;
     }
 
+    // ✅ Function to Update UI with Patient Details
     function updatePatientDetails(patient) {
         const details = document.getElementsByClassName("patientDetails");
         const patientInfo = `
-        <strong>ID:</strong> ${patient.id}<br>
-        <strong>Name:</strong> ${patient.name}<br>
-        <strong>Age:</strong> ${patient.age}<br>
-        <strong>Gender:</strong> ${patient.gender}<br>
-        <strong>Contact:</strong> ${patient.contact}<br>
-        <strong>Address:</strong> ${patient.address}
-    `;
+            <strong>ID:</strong> ${patient.id}<br>
+            <strong>Name:</strong> ${patient.name}<br>
+            <strong>Age:</strong> ${patient.age}<br>
+            <strong>Gender:</strong> ${patient.gender}<br>
+            <strong>Contact:</strong> ${patient.contact}<br>
+            <strong>Address:</strong> ${patient.address}
+        `;
 
         for (let i = 0; i < details.length; i++) {
             details[i].innerHTML = patientInfo;
         }
     }
 
-    function clearPatientDetails(patient) {
-        const details = document.getElementsByClassName("patientDetails");
-
-        for (let i = 0; i < details.length; i++) {
-            details[i].textContent = "";
-        }
-    }
-
-    // Create Patient
-    document.getElementById("createPatientForm").addEventListener("submit", function (e) {
+    // ✅ Create Patient
+    document.getElementById("createPatientForm").addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const patientData = {
@@ -256,261 +282,121 @@
             age: parseInt(document.getElementById("age").value, 10),
             gender: document.getElementById("gender").value,
             contact: document.getElementById("contact").value,
-            address: document.getElementById("address").value,
+            address: document.getElementById("address").value
         };
 
-        let validationError = null;
-        
-        if (patientData.age <= 0 ) {
-            validationError =  "Age must be a positive number";
-        }
-
-        if (patientData.gender !== "M" && patientData.gender !== "F") {
-            validationError =  "Gender must be either 'M' or 'F'";
-        }
-
-        if (!patientData.name || patientData.name.length < 2 || patientData.name.length > 25) {
-            validationError =  "Name must be between 2 and 25 characters";
-        }
-
-        if (!patientData.contact || !patientData.contact.startsWith("+7") || patientData.contact.length < 12) {
-            validationError =  "Contact must start with '+7' and be at least 12 characters long";
-        }
-
-
+        let validationError = validatePatientData(patientData);
         if (validationError) {
             showMessage(validationError, false);
-            return; 
+            return;
         }
 
+        const token = await getAuthToken();
         fetch(baseUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(patientData),
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(patientData)
         })
-            .then(handleResponse)
-            .then((data) => {
-                if (data.code === 201) {
-                    showMessage(`Patient created successfully! `);
-                    updatePatientDetails(data.content);
-                }
-            })
-            .catch((error) => {
-                showMessage(error.message || "Error creating patient", false);
-            });
-    });
-
-    // Update Patient
-document.getElementById("updatePatientForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const updateId = document.getElementById("updateId").value;
-    const patientData = {};
-
-    const name = document.getElementById("updateName").value;
-    if (name) {
-        if (name.length < 2 || name.length > 25) {
-            showMessage("Name must be between 2 and 25 characters", false);
-            return;
-        }
-        patientData.name = name;
-    }
-
-    const age = document.getElementById("updateAge").value;
-    if (age) {
-        const ageInt = parseInt(age, 10);
-        if (ageInt <= 0) {
-            showMessage("Age must be a positive number", false);
-            return;
-        }
-        patientData.age = ageInt;
-    }
-
-    const gender = document.getElementById("updateGender").value;
-    if (gender) {
-        if (gender !== "M" && gender !== "F") {
-            showMessage("Gender must be either 'M' or 'F'", false);
-            return;
-        }
-        patientData.gender = gender;
-    }
-
-    const contact = document.getElementById("updateContact").value;
-    if (contact) {
-        if (!contact.startsWith("+7") || contact.length < 12) {
-            showMessage("Contact must start with '+7' and be at least 12 characters long", false);
-            return;
-        }
-        patientData.contact = contact;
-    }
-
-    const address = document.getElementById("updateAddress").value;
-    if (address) {
-        patientData.address = address;
-    }
-
-    if (Object.keys(patientData).length === 0) {
-        showMessage("Please provide at least one field to update", false);
-        return;
-    }
-
-    fetch(`${baseUrl}/${updateId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patientData),
-    })
         .then(handleResponse)
         .then((data) => {
-            if (data.code === 200) {
-                showMessage("Patient updated successfully!");
-                updatePatientDetails(data.content);
-            }
+            showMessage("Patient created successfully!");
+            updatePatientDetails(data.content);
         })
-        .catch((error) => {
-            showMessage(error.message || "Error updating patient", false);
-        });
-});
+        .catch((error) => showMessage(error.message || "Error creating patient", false));
+    });
 
-    document.getElementById("deletePatientForm").addEventListener("submit", function (e) {
+    // ✅ Update Patient
+    document.getElementById("updatePatientForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const updateId = document.getElementById("updateId").value;
+        const patientData = {};
+
+        if (document.getElementById("updateName").value) patientData.name = document.getElementById("updateName").value;
+        if (document.getElementById("updateAge").value) patientData.age = parseInt(document.getElementById("updateAge").value, 10);
+        if (document.getElementById("updateGender").value) patientData.gender = document.getElementById("updateGender").value;
+        if (document.getElementById("updateContact").value) patientData.contact = document.getElementById("updateContact").value;
+        if (document.getElementById("updateAddress").value) patientData.address = document.getElementById("updateAddress").value;
+
+        if (Object.keys(patientData).length === 0) {
+            showMessage("Please provide at least one field to update", false);
+            return;
+        }
+
+        const token = await getAuthToken();
+        fetch(`${baseUrl}/${updateId}`, {
+            method: "PUT",
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(patientData)
+        })
+        .then(handleResponse)
+        .then((data) => {
+            showMessage("Patient updated successfully!");
+            updatePatientDetails(data.content);
+        })
+        .catch((error) => showMessage(error.message || "Error updating patient", false));
+    });
+
+    // ✅ Delete Patient
+    document.getElementById("deletePatientForm").addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const deleteId = document.getElementById("deleteId").value;
+        const token = await getAuthToken();
 
         fetch(`${baseUrl}/${deleteId}`, {
             method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
         })
-            .then(handleResponse)
-            .then((data) => {
-                if (data.code === 200) {
-                    showMessage("Patient deleted successfully!");
-                } else if (data.code === 404) {
-                    showMessage("Patient not found", false);
-                }
-                clearPatientDetails()
-            })
-            .catch((error) => {
-                showMessage(error.message || "Error deleting patient", false);
-            });
+        .then(handleResponse)
+        .then((data) => showMessage("Patient deleted successfully!"))
+        .catch((error) => showMessage(error.message || "Error deleting patient", false));
     });
 
-    document.getElementById("showPatientForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const showId = document.getElementById("showId").value;
-
-        fetch(`${baseUrl}/${showId}`)
-            .then(handleResponse)
-            .then((data) => {
-                if (data.code === 200) {
-                    updatePatientDetails(data.content);
-                } else if (data.code === 404) {
-                    showMessage("Patient not found", false);
-                }
-            })
-            .catch((error) => {
-                showMessage(error.message || "Error fetching patient", false);
-            });
-    });
+    // ✅ Fetch All Patients
     function showAllPatients() {
-        const allPatientsContainer = document.getElementById("allPatientsContainer");
-        const allPatientsList = document.getElementById("allPatientsList");
-
-        const forms = document.querySelectorAll('.form-container');
-        forms.forEach(form => form.classList.add('hidden'));
-
-        allPatientsList.innerHTML = "";
-
-        fetch(baseUrl)
-            .then(handleResponse)
-            .then((data) => {
-                if (data.code === 200) {
-                    data.content.forEach((patient) => {
-                        const listItem = document.createElement("li");
-                        listItem.textContent = `ID: ${patient.id}, Name: ${patient.name}, Age: ${patient.age}, Gender: ${patient.gender}, Contact: ${patient.contact}, Address: ${patient.address}`;
-                        allPatientsList.appendChild(listItem);
-                    });
-
-                    allPatientsContainer.classList.remove('hidden');
-                }
-            })
-            .catch((error) => {
-                showMessage(error.message || "Error fetching all patients", false);
-            });
-}
-
-
-    
-});
-
-    function handleResponse(response) {
-        return response.json().then((data) => {
-            if (response.ok) {
-                return data;
-            } else {
-                throw { code: data.code, message: data.message || "Unknown error" };
-            }
-        });
+        fetchPatients();
     }
 
-    function showMessage(message, success = true) {
-        alert(success ? `✅ ${message}` : `❌ ${message}`);
-    }
+    async function fetchPatients() {
+        const token = await getAuthToken();
+        console.log("🔥 Firebase Token Sent to Backend:", token); // ✅ Debugging Log
 
-    function showAllPatients() {
-    const allPatientsContainer = document.getElementById("allPatientsContainer");
-    const allPatientsList = document.getElementById("allPatientsList");
-
-    const forms = document.querySelectorAll('.form-container');
-    forms.forEach(form => form.classList.add('hidden'));
-
-    allPatientsList.innerHTML = "";
-
-    fetch("http://localhost:8080/patients")
+        if (!token) {
+            alert("You must be logged in to access this page.");
+            window.location.href = "/";
+            return;
+        }
+        
+        fetch(baseUrl, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+        })
         .then(handleResponse)
         .then((data) => {
-            if (data.code === 200) {
-                let table = `
-                    <table border="1" cellspacing="0" cellpadding="8">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Age</th>
-                                <th>Gender</th>
-                                <th>Contact</th>
-                                <th>Address</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
+            const allPatientsContainer = document.getElementById("allPatientsContainer");
+            const allPatientsList = document.getElementById("allPatientsList");
+            allPatientsList.innerHTML = "";
 
-                data.content.forEach((patient) => {
-                    table += `
-                        <tr>
-                            <td>${patient.id}</td>
-                            <td>${patient.name}</td>
-                            <td>${patient.age}</td>
-                            <td>${patient.gender}</td>
-                            <td>${patient.contact}</td>
-                            <td>${patient.address}</td>
-                        </tr>
-                    `;
-                });
+            let table = `<table><thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Contact</th><th>Address</th></tr></thead><tbody>`;
+            data.content.forEach(patient => {
+                table += `<tr><td>${patient.id}</td><td>${patient.name}</td><td>${patient.age}</td><td>${patient.gender}</td><td>${patient.contact}</td><td>${patient.address}</td></tr>`;
+            });
+            table += `</tbody></table>`;
 
-                table += `
-                        </tbody>
-                    </table>
-                `;
-
-                allPatientsList.innerHTML = table;
-
-                allPatientsContainer.classList.remove('hidden');
-            }
+            allPatientsList.innerHTML = table;
+            allPatientsContainer.classList.remove('hidden');
         })
-        .catch((error) => {
-            showMessage(error.message || "Error fetching all patients", false);
-        });
-}
+        .catch((error) => showMessage(error.message || "Error fetching patients", false));
+    }
 
-
-    </script>
+    // ✅ Logout Function
+    function logout() {
+        firebase.auth().signOut().then(() => {
+            localStorage.removeItem("firebaseToken");
+            alert("Logged out successfully!");
+            window.location.href = "/";
+        }).catch((error) => console.error("Logout Error:", error));
+    }
+});
+</script>

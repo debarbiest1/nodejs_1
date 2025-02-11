@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        section {
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .form-container {
+            margin: 20px auto;
+            width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            margin: 5px;
+            padding: 8px;
+            width: calc(100% - 16px);
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Clinic Management System</h1>
+    </header>
+
+    <section>
+        <h2>Manage Doctors</h2>
+        <div>
+            <button onclick="showForm('createDoctorForm')">Add Doctor</button>
+            <button onclick="showForm('updateDoctorForm')">Update Doctor</button>
+            <button onclick="showForm('deleteDoctorForm')">Delete Doctor</button>
+            <button onclick="showAllDoctors()">Show All Doctors</button>
+            <div id="doctorsTableContainer" class="hidden">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Specialty</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctorsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="createDoctorForm" class="form-container hidden">
+            <h3>Add Doctor</h3>
+            <form id="addDoctorForm">
+                <input type="text" placeholder="Name" id="doctorName" required>
+                <input type="text" placeholder="Specialty" id="doctorSpecialty" required>
+                <input type="text" placeholder="Contact" id="doctorContact" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    
+        <div id="updateDoctorForm" class="form-container hidden">
+            <h3>Update Doctor</h3>
+            <form id="updateDoctor">
+                <input type="number" placeholder="Doctor ID" id="updateDoctorId" required>
+                <input type="text" placeholder="Name" id="updateDoctorName">
+                <input type="text" placeholder="Specialty" id="updateDoctorSpecialty">
+                <input type="text" placeholder="Contact" id="updateDoctorContact">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    
+        <div id="deleteDoctorForm" class="form-container hidden">
+            <h3>Delete Doctor</h3>
+            <form id="deleteDoctor">
+                <input type="number" placeholder="Doctor ID" id="deleteDoctorId" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </section>
+
+  
+
+
+    <footer>
+        <p>&copy; 2024 Clinic Management System</p>
+    </footer>
+
+    <script>
+        function showForm(formId) {
+            const forms = document.querySelectorAll('.form-container');
+            forms.forEach(form => form.classList.add('hidden'));
+            document.getElementById(formId).classList.remove('hidden');
+        }
+
+        function showAllDoctors() {
+            fetch('http://localhost:8080/doctors')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('doctorsTableBody');
+                    tableBody.innerHTML = '';
+                    data.content.forEach(doc => {
+                        const row = `<tr>
+                            <td>${doc.id}</td>
+                            <td>${doc.name}</td>
+                            <td>${doc.specialty}</td>
+                            <td>${doc.contact}</td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                    document.getElementById('doctorsTableContainer').classList.remove('hidden');
+                })
+                .catch(error => alert('Error fetching doctors: ' + error));
+        }
+
+        document.getElementById("addDoctorForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const doctorData = {
+                name: document.getElementById("doctorName").value,
+                specialty: document.getElementById("doctorSpecialty").value,
+                contact: document.getElementById("doctorContact").value
+            };
+            fetch("http://localhost:8080/doctors", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(doctorData)
+            })
+            .then(response => response.json())
+            .then(data => alert("Doctor added successfully!"))
+            .catch(error => alert("Error adding doctor: " + error));
+        });
+
+        document.getElementById("updateDoctor").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const doctorId = document.getElementById("updateDoctorId").value;
+            const updatedData = {
+                name: document.getElementById("updateDoctorName").value,
+                specialty: document.getElementById("updateDoctorSpecialty").value,
+                contact: document.getElementById("updateDoctorContact").value
+            };
+            fetch(`http://localhost:8080/doctors/${doctorId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedData)
+            })
+            .then(response => response.json())
+            .then(data => alert("Doctor updated successfully!"))
+            .catch(error => alert("Error updating doctor: " + error));
+        });
+
+        document.getElementById("deleteDoctor").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const doctorId = document.getElementById("deleteDoctorId").value;
+            fetch(`http://localhost:8080/doctors/${doctorId}`, {
+                method: "DELETE"
+            })
+            .then(response => response.json())
+            .then(data => alert("Doctor deleted successfully!"))
+            .catch(error => alert("Error deleting doctor: " + error));
+        });
+
+
+
+    </script>
+</body>
+</html>

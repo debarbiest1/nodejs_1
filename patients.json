@@ -1,0 +1,74 @@
+[
+  {
+    "id": 3,
+    "name": "K",
+    "age": 12,
+    "gender": "M",
+    "contact": "2",
+    "address": "M"
+  },
+  {
+    "id": 4,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 5,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 6,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 7,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 8,
+    "name": "Кумисай",
+    "age": 20,
+    "gender": "F",
+    "contact": "+777777777777",
+    "address": "A"
+  },
+  {
+    "id": 10,
+    "name": "K",
+    "age": 19,
+    "gender": "M",
+    "contact": "a",
+    "address": "M"
+  },
+  {
+    "id": 11,
+    "name": "Arman Kyzykbaev",
+    "age": 19,
+    "gender": "M",
+    "contact": "+777777777777",
+    "address": "фвф"
+  },
+  {
+    "id": 15,
+    "name": "John Doe",
+    "age": 14,
+    "gender": "F",
+    "contact": "123-456-7890",
+    "address": "123 Main St"
+  }
+]
