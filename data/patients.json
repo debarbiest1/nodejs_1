@@ -1,13 +1,5 @@
 [
   {
-    "id": 2,
-    "name": "KK",
-    "age": 20,
-    "gender": "M",
-    "contact": "+777777777775",
-    "address": "Millenium Street"
-  },
-  {
     "id": 3,
     "name": "K",
     "age": 12,
@@ -72,18 +64,10 @@
     "address": "фвф"
   },
   {
-    "id": 13,
-    "name": "Ka",
-    "age": 51,
-    "gender": "M",
-    "contact": "+77055677172",
-    "address": "M"
-  },
-  {
-    "id": 14,
+    "id": 15,
     "name": "John Doe",
     "age": 14,
-    "gender": "P",
+    "gender": "F",
     "contact": "123-456-7890",
     "address": "123 Main St"
   }

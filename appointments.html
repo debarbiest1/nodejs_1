@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        section {
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .form-container {
+            margin: 20px auto;
+            width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            margin: 5px;
+            padding: 8px;
+            width: calc(100% - 16px);
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Clinic Management System</h1>
+    </header>
+
+    <section>
+        <h2>Manage Appointments</h2>
+        <div>
+            <button onclick="showForm('createAppointmentForm')">Create Appointment</button>
+            <button onclick="showForm('deleteAppointmentForm')">Cancel Appointment</button>
+            <button onclick="showForm('showAppointmentForm')">Show Appointment</button>
+            <button onclick="showAllAppointments()">Show All Appointments</button>
+        </div>
+
+        <!-- Appointments Table -->
+        <div id="appointmentsTableContainer" class="hidden">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient name</th>
+                        <th>Doctor name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="createAppointmentForm" class="form-container hidden">
+            <h3>Create Appointment</h3>
+            <form id="addAppointmentForm">
+                <input type="number" placeholder="Patient ID" id="appointmentPatientId" required>
+                <input type="number" placeholder="Doctor ID" id="appointmentDoctorId" required>
+                <input type="date" id="appointmentDate" required>
+                <input type="time" id="appointmentTime" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <div id="deleteAppointmentForm" class="form-container hidden">
+            <h3>Cancel Appointment</h3>
+            <form id="cancelAppointment">
+                <input type="number" placeholder="Appointment ID" id="deleteAppointmentId" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <div id="showAppointmentForm" class="form-container hidden">
+            <h3>Show Appointment</h3>
+            <form id="viewAppointment">
+                <input type="number" placeholder="Appointment ID" id="showAppointmentId" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Clinic Management System</p>
+    </footer>
+
+    <script>
+        function showForm(formId) {
+            const forms = document.querySelectorAll('.form-container');
+            forms.forEach(form => form.classList.add('hidden'));
+            document.getElementById(formId).classList.remove('hidden');
+        }
+
+        function showAllAppointments() {
+            fetch('http://localhost:8080/appointments')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('appointmentsTableBody');
+                    tableBody.innerHTML = '';
+
+                    if (!data.content.length) {
+                        alert("No appointments found.");
+                        return;
+                    }
+
+                    data.content.forEach(app => {
+                        const row = `<tr>
+                            <td>${app.id}</td>
+                            <td>${app.patient_name}</td>
+                            <td>${app.doctor_name}</td>
+                            <td>${app.date}</td>
+                            <td>${app.time}</td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+
+                    document.getElementById('appointmentsTableContainer').classList.remove('hidden');
+                })
+                .catch(error => alert('Error fetching appointments: ' + error));
+        }
+
+        document.getElementById("addAppointmentForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const appointmentData = {
+                patient_id: document.getElementById("appointmentPatientId").value,
+                doctor_id: document.getElementById("appointmentDoctorId").value,
+                date: document.getElementById("appointmentDate").value,
+                time: document.getElementById("appointmentTime").value
+            };
+            fetch("http://localhost:8080/appointments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(appointmentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Appointment created successfully!");
+                showAllAppointments();
+            })
+            .catch(error => alert("Error creating appointment: " + error));
+        });
+
+        document.getElementById("cancelAppointment").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const appointmentId = document.getElementById("deleteAppointmentId").value;
+            fetch(`http://localhost:8080/appointments/${appointmentId}`, {
+                method: "DELETE"
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Appointment canceled successfully!");
+                showAllAppointments();
+            })
+            .catch(error => alert("Error canceling appointment: " + error));
+        });
+
+        document.getElementById("viewAppointment").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const appointmentId = document.getElementById("showAppointmentId").value;
+            fetch(`http://localhost:8080/appointments/${appointmentId}`)
+            .then(response => response.json())
+            .then(data => alert(JSON.stringify(data.content, null, 2)))
+            .catch(error => alert("Error fetching appointment: " + error));
+        });
+    </script>
+</body>
+</html>
