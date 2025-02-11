@@ -1,97 +1,49 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
 
+const verifyFirebaseToken = require("./middlewares/firebaseAuthMiddleware");
+const patientRoutes = require('./routes/patientRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const errorHandler = require('./middlewares/errorHandlers');
+const validateInputs = require("./middlewares/validateInputs");
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 
-// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Serve the HTML file
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html')); // Adjust the path if needed
+// 🔒 Restrict all API routes to authenticated users in Firebase Auth
+// API Routes
+app.use(validateInputs);
+// ✅ Добавляем middleware перед маршрутами
+app.use("/patients", validateInputs, patientRoutes);
+app.use("/doctors", validateInputs, doctorRoutes);
+app.use("/appointments", validateInputs, appointmentRoutes);
+
+
+// 🔒 Route to verify token
+app.get("/verify-token", verifyFirebaseToken, (req, res) => {
+    res.status(200).json({ code: 200, message: "Token is valid", user: req.user });
 });
 
-// In-memory database
-let patients = [];
-let nextId = 1;
+// Serve Static Files
+app.use(express.static('public'));
 
-// Routes
-// Create Patient
-app.post('/patients', (req, res) => {
-    const { name, age, gender, contact, address } = req.body;
+// Routes for Frontend Pages
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/managepatients', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/manage', (req, res) => res.sendFile(path.join(__dirname, 'adminpanel.html')));
+app.get('/managedoctors', (req, res) => res.sendFile(path.join(__dirname, 'doctors.html')));
+app.get('/manageappointments', (req, res) => res.sendFile(path.join(__dirname, 'appointments.html')));
 
-    if (!name || !age || !gender || !contact || !address) {
-        return res.status(400).json({ code: 400, message: 'All fields are required.' });
-    }
+// Global Error Handler
+app.use(errorHandler);
 
-    const newPatient = {
-        id: nextId++,
-        name,
-        age,
-        gender,
-        contact,
-        address,
-    };
-
-    patients.push(newPatient);
-    res.status(201).json({ code: 201, content: newPatient });
-});
-
-// Read All Patients
-app.get('/patients', (req, res) => {
-    res.json({ code: 200, content: patients });
-});
-
-// Read Single Patient
-app.get('/patients/:id', (req, res) => {
-    const patientId = parseInt(req.params.id, 10);
-    const patient = patients.find((p) => p.id === patientId);
-
-    if (!patient) {
-        return res.status(404).json({ code: 404, message: 'Patient not found.' });
-    }
-
-    res.json({ code: 200, content: patient });
-});
-
-// Update Patient
-app.put('/patients/:id', (req, res) => {
-    const patientId = parseInt(req.params.id, 10);
-    const { name, age, gender, contact, address } = req.body;
-
-    const patient = patients.find((p) => p.id === patientId);
-
-    if (!patient) {
-        return res.status(404).json({ code: 404, message: 'Patient not found))).' });
-    }
-
-    if (name) patient.name = name;
-    if (age) patient.age = age;
-    if (gender) patient.gender = gender;
-    if (contact) patient.contact = contact;
-    if (address) patient.address = address;
-
-    res.json({ code: 200, content: patient });
-});
-
-// Delete Patient
-app.delete('/patients/:id', (req, res) => {
-    const patientId = parseInt(req.params.id, 10);
-    const index = patients.findIndex((p) => p.id === patientId);
-
-    if (index === -1) {
-        return res.status(404).json({ code: 404, message: 'Patient not found.' });
-    }
-
-    patients.splice(index, 1);
-    res.json({ code: 200, message: 'Patient deleted successfully!!!!!!!!!!!' });
-});
-
-// Start the server
+// Start Server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`🚀 Server is running on http://localhost:${port}`);
 });
+
