@@ -58,6 +58,24 @@ Each user gets a unique JWT token upon login<br>
 Tokens are stored securely and used for authentication<br>
 Device-specific token management prevents multiple unauthorized logins<br>
 
+
+
+### Security Measures in the Project
+1. Preventing SQL Injection
+
+Used parameterized queries ($1, $2) to prevent SQL injection.<br>
+Implemented input validation middleware to sanitize user input.<br>
+2. Handling JWT Tokens & Preventing Multiple Logins<br>
+
+Firebase Authentication issues JWT tokens per login.<br>
+Tokens are device-specific and stored in PostgreSQL.<br>
+When a user logs in from a new device, the old token is revoked.<br>
+3. Password Encryption
+
+Firebase hashes passwords internally, so no plaintext passwords are stored.<br>
+If passwords were manually stored, Bcrypt would be used for hashing and verification.<br>
+This ensures secure authentication, protected database access, and encrypted user data.<br>
+
 How to use Firebase API for this project?<br>
 
 1. Go to Firebase Console. Click Add Project, follow the setup, and enable Email/Password under Authentication > Sign-in Method.
@@ -108,6 +126,7 @@ Future Improvements <br>
 🔹 Email Notifications for Appointments<br>
 🔹 Admin Dashboard for User Management<br>
 🔹 Analytics & Reporting System<br>
+
 
 
 My tests for middlewares:
