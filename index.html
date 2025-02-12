@@ -187,7 +187,7 @@
  <script>
 
 
-// Firebase SDK Initialization
+
 const firebaseConfig = {
             apiKey: "AIzaSyBnCkoejLpSZ9n2CAkeJXZBy6gsgtTcHL4",
             authDomain: "clinicms-40dcc.firebaseapp.com",
@@ -203,7 +203,6 @@ const auth = firebase.auth();
 document.addEventListener("DOMContentLoaded", async function () {
     const baseUrl = "http://localhost:8080/patients";
 
-    // ✅ Check Authentication on Page Load
     firebase.auth().onAuthStateChanged(async (user) => {
         if (!user) {
             alert("You must log in first!");
@@ -222,7 +221,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-    // ✅ Fetch Firebase Token for API Requests
     async function getAuthToken() {
         const user = firebase.auth().currentUser;
         if (user) {
@@ -231,12 +229,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         return null;
     }
 
-    // ✅ Function to Show Messages
     function showMessage(message, success = true) {
         alert(success ? `✅ ${message}` : `❌ ${message}`);
     }
 
-    // ✅ Function to Handle API Responses
     function handleResponse(response) {
         return response.json().then((data) => {
             if (response.ok) {
@@ -247,7 +243,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    // ✅ Validate Patient Data
     function validatePatientData(patient) {
         if (patient.age <= 0) return "Age must be a positive number";
         if (patient.gender !== "M" && patient.gender !== "F") return "Gender must be 'M' or 'F'";
@@ -256,7 +251,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         return null;
     }
 
-    // ✅ Function to Update UI with Patient Details
     function updatePatientDetails(patient) {
         const details = document.getElementsByClassName("patientDetails");
         const patientInfo = `
@@ -273,7 +267,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    // ✅ Create Patient
     document.getElementById("createPatientForm").addEventListener("submit", async function (e) {
         e.preventDefault();
 
@@ -305,7 +298,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         .catch((error) => showMessage(error.message || "Error creating patient", false));
     });
 
-    // ✅ Update Patient
     document.getElementById("updatePatientForm").addEventListener("submit", async function (e) {
         e.preventDefault();
 
@@ -337,7 +329,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         .catch((error) => showMessage(error.message || "Error updating patient", false));
     });
 
-    // ✅ Delete Patient
     document.getElementById("deletePatientForm").addEventListener("submit", async function (e) {
         e.preventDefault();
 
@@ -353,14 +344,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         .catch((error) => showMessage(error.message || "Error deleting patient", false));
     });
 
-    // ✅ Fetch All Patients
     function showAllPatients() {
         fetchPatients();
     }
 
     async function fetchPatients() {
         const token = await getAuthToken();
-        console.log("🔥 Firebase Token Sent to Backend:", token); // ✅ Debugging Log
+        console.log("🔥 Firebase Token Sent to Backend:", token); 
 
         if (!token) {
             alert("You must be logged in to access this page.");
@@ -389,8 +379,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         })
         .catch((error) => showMessage(error.message || "Error fetching patients", false));
     }
-
-    // ✅ Logout Function
+    
     function logout() {
         firebase.auth().signOut().then(() => {
             localStorage.removeItem("firebaseToken");

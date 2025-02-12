@@ -1,6 +1,5 @@
-const pool = require('../data/database'); // Ensure the correct import
+const pool = require('../data/database'); 
 
-// ✅ Get all doctors
 const getDoctors = async () => {
     try {
         const { rows } = await pool.query('SELECT * FROM doctors');
@@ -11,7 +10,6 @@ const getDoctors = async () => {
     }
 };
 
-// ✅ Get a doctor by ID (Check if doctor exists)
 const getDoctorById = async (id) => {
     try {
         const { rows } = await pool.query('SELECT * FROM doctors WHERE id = $1', [id]);
@@ -25,7 +23,6 @@ const getDoctorById = async (id) => {
     }
 };
 
-// ✅ Add a new doctor (With validation)
 const addDoctor = async ({ name, specialty, contact }) => {
     try {
         if (!name || !specialty || !contact) {
@@ -43,10 +40,8 @@ const addDoctor = async ({ name, specialty, contact }) => {
     }
 };
 
-// ✅ Update doctor information (Check if doctor exists)
 const updateDoctor = async (id, { name, specialty, contact }) => {
     try {
-        // Check if doctor exists
         const check = await pool.query('SELECT * FROM doctors WHERE id=$1', [id]);
         if (check.rowCount === 0) {
             throw new Error(`Doctor with ID ${id} not found`);
@@ -63,10 +58,8 @@ const updateDoctor = async (id, { name, specialty, contact }) => {
     }
 };
 
-// ✅ Delete a doctor (Check if doctor exists)
 const deleteDoctor = async (id) => {
     try {
-        // Check if doctor exists
         const check = await pool.query('SELECT * FROM doctors WHERE id=$1', [id]);
         if (check.rowCount === 0) {
             throw new Error(`Doctor with ID ${id} not found`);

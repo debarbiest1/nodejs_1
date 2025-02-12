@@ -79,7 +79,6 @@ const auth = firebase.auth();
 document.addEventListener("DOMContentLoaded", async function () {
     const baseUrl = "http://localhost:8080/patients";
 
-    // ✅ Check Authentication on Page Load
     firebase.auth().onAuthStateChanged(async (user) => {
         if (!user) {
             alert("You must log in first!");

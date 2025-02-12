@@ -1,32 +1,31 @@
-const admin = require("../config/firebaseAdmin");
+const admin = require("firebase-admin");
+const pool = require("../data/database");
 
 const verifyFirebaseToken = async (req, res, next) => {
-    const authHeader = req.header("Authorization");
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ code: 401, message: "Access Denied. Please log in." });
-    }
-
-    const token = authHeader.split(" ")[1];
-
     try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        const userEmail = decodedToken.email; // Get email from token
+        const token = req.headers.authorization?.split("Bearer ")[1];
+        const device_id = req.headers["device-id"];
 
-        console.log("Decoded Token:", decodedToken);
-
-        // 🛑 Check if email exists in Firebase Authentication
-        const userRecord = await admin.auth().getUserByEmail(userEmail);
-        
-        if (!userRecord) {
-            return res.status(403).json({ code: 403, message: "Access Denied. Your email is not registered in Firebase." });
+        if (!token || !device_id) {
+            return res.status(401).json({ message: "Unauthorized: No token or device ID provided" });
         }
 
-        req.user = decodedToken; // Attach user info to request
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        req.user = decodedToken;
+
+        const result = await pool.query(
+            "SELECT token FROM user_tokens WHERE user_id = $1 AND device_id = $2",
+            [decodedToken.uid, device_id]
+        );
+
+        if (result.rowCount === 0 || result.rows[0].token !== token) {
+            return res.status(401).json({ message: "Session expired. Please log in again." });
+        }
+
         next();
     } catch (error) {
-        console.error("Firebase Token Verification Failed:", error);
-        res.status(403).json({ code: 403, message: "Invalid or expired token. Please log in again." });
+        console.error("❌ Firebase Token Verification Error:", error);
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
 };
 

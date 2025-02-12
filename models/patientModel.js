@@ -1,6 +1,5 @@
 const pool = require('../data/database');
 
-// ✅ Get all patients
 const getPatients = async () => {
     try {
         const { rows } = await pool.query('SELECT * FROM patients');
@@ -11,7 +10,6 @@ const getPatients = async () => {
     }
 };
 
-// ✅ Add a new patient (with validation)
 const addPatient = async ({ name, age, gender, contact, address }) => {
     try {
         if (!name || !age || !gender || !contact || !address) {
@@ -29,10 +27,8 @@ const addPatient = async ({ name, age, gender, contact, address }) => {
     }
 };
 
-// ✅ Update a patient (check if patient exists first)
 const updatePatient = async (id, { name, age, gender, contact, address }) => {
     try {
-        // Check if patient exists
         const check = await pool.query('SELECT * FROM patients WHERE id=$1', [id]);
         if (check.rowCount === 0) {
             throw new Error(`Patient with ID ${id} not found`);
@@ -49,10 +45,8 @@ const updatePatient = async (id, { name, age, gender, contact, address }) => {
     }
 };
 
-// ✅ Delete a patient (check if patient exists first)
 const deletePatient = async (id) => {
     try {
-        // Check if patient exists
         const check = await pool.query('SELECT * FROM patients WHERE id=$1', [id]);
         if (check.rowCount === 0) {
             throw new Error(`Patient with ID ${id} not found`);

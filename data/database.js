@@ -16,16 +16,14 @@ pool.connect()
         process.exit(1);
     });
 
-module.exports = pool;  // Ensure pool is exported correctly
+module.exports = pool;  
 
 
-// Get all patients
 const getPatients = async () => {
     const { rows } = await pool.query('SELECT * FROM patients');
     return rows;
 };
 
-// Add a new patient
 const addPatient = async (newPatient) => {
     const { name, age, gender, contact, address } = newPatient;
     const { rows } = await pool.query(
@@ -35,7 +33,6 @@ const addPatient = async (newPatient) => {
     return rows[0];
 };
 
-// Update patient information
 const updatePatient = async (id, updatedPatient) => {
     const { name, age, gender, contact, address } = updatedPatient;
     const { rows } = await pool.query(
@@ -45,19 +42,16 @@ const updatePatient = async (id, updatedPatient) => {
     return rows[0];
 };
 
-// Delete a patient
 const deletePatient = async (id) => {
     await pool.query('DELETE FROM patients WHERE id=$1', [id]);
     return { message: 'Patient deleted successfully' };
 };
 
-// Get all doctors
 const getDoctors = async () => {
     const { rows } = await pool.query('SELECT * FROM doctors');
     return rows;
 };
 
-// Add a new doctor
 const addDoctor = async (newDoctor) => {
     const { name, specialty, contact } = newDoctor;
     const { rows } = await pool.query(
@@ -67,7 +61,6 @@ const addDoctor = async (newDoctor) => {
     return rows[0];
 };
 
-// Update doctor information
 const updateDoctor = async (id, updatedDoctor) => {
     const { name, specialty, contact } = updatedDoctor;
     const { rows } = await pool.query(
@@ -77,14 +70,11 @@ const updateDoctor = async (id, updatedDoctor) => {
     return rows[0];
 };
 
-// Delete a doctor
 const deleteDoctor = async (id) => {
     await pool.query('DELETE FROM doctors WHERE id=$1', [id]);
     return { message: 'Doctor deleted successfully' };
 };
 
-// Get all appointments
-// Get all appointments with patient and doctor details
 const getAppointments = async () => {
     const { rows } = await pool.query(`
         SELECT a.id, a.date, a.time, 
@@ -97,7 +87,6 @@ const getAppointments = async () => {
     return rows;
 };
 
-// Get appointment by ID
     const getAppointmentById = async (id) => {
         const { rows } = await pool.query(
             `SELECT a.id, a.date, a.time, 
@@ -111,7 +100,6 @@ const getAppointments = async () => {
         return rows[0] || null;
     };
 
-    // Add a new appointment
     const addAppointment = async ({ patient_id, doctor_id, date, time }) => {
         const { rows } = await pool.query(
             'INSERT INTO appointments (patient_id, doctor_id, date, time) VALUES ($1, $2, $3, $4) RETURNING *',
@@ -120,7 +108,6 @@ const getAppointments = async () => {
         return rows[0];
     };
 
-    // Delete an appointment
     const deleteAppointment = async (id) => {
         await pool.query('DELETE FROM appointments WHERE id=$1', [id]);
         return { message: 'Appointment deleted successfully' };

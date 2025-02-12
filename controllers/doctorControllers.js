@@ -1,4 +1,4 @@
-const db = require('../data/database'); // Using PostgreSQL database.js
+const db = require('../data/database'); 
 
 exports.getAllDoctors = async (req, res) => {
     try {

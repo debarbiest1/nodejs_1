@@ -1,6 +1,5 @@
-const pool = require('../data/database'); // Importing PostgreSQL connection
+const pool = require('../data/database'); 
 
-// Get all appointments
 const getAppointments = async () => {
     try {
         const { rows } = await pool.query( `SELECT a.id, a.date, a.time, 
@@ -16,8 +15,6 @@ const getAppointments = async () => {
     }
 };
 
-
-// Add a new appointment
 const addAppointment = async ({ patient_id, doctor_id, date, time }) => {
     try {
         const { rows } = await pool.query(
@@ -32,7 +29,6 @@ const addAppointment = async ({ patient_id, doctor_id, date, time }) => {
     }
 };
 
-// Update an appointment
 const updateAppointment = async (id, updatedData) => {
     const { date, time } = updatedData;
     try {
@@ -47,7 +43,6 @@ const updateAppointment = async (id, updatedData) => {
     }
 };
 
-// Delete an appointment
 const deleteAppointment = async (id) => {
     try {
         await pool.query('DELETE FROM appointments WHERE id=$1', [id]);

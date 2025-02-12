@@ -1,6 +1,5 @@
-const db = require('../data/database'); // Using PostgreSQL connection
+const db = require('../data/database'); 
 
-// Get all appointments
 exports.getAllAppointments = async (req, res) => {
     try {
         const appointments = await db.getAppointments();
@@ -12,7 +11,6 @@ exports.getAllAppointments = async (req, res) => {
 };
 
 
-// Get an appointment by ID
 exports.getAppointmentById = async (req, res) => {
     try {
         const appointmentId = parseInt(req.params.id, 10);
@@ -30,7 +28,6 @@ exports.getAppointmentById = async (req, res) => {
     }
 };
 
-// Create a new appointment
 exports.createAppointment = async (req, res) => {
     try {
         const { patient_id, doctor_id, date, time } = req.body;
@@ -49,7 +46,6 @@ exports.createAppointment = async (req, res) => {
     }
 };
 
-// Update an appointment
 exports.updateAppointment = async (req, res) => {
     try {
         const appointmentId = parseInt(req.params.id, 10);
@@ -66,7 +62,6 @@ exports.updateAppointment = async (req, res) => {
     }
 };
 
-// Delete an appointment
 exports.deleteAppointment = async (req, res) => {
     try {
         const appointmentId = parseInt(req.params.id, 10);
